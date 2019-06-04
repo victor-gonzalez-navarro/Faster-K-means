@@ -5,18 +5,38 @@ from sklearn import preprocessing as prp
 
 def read_dataset():
 
-    realdata = int(input('Do you want to use artificial or real data? (0-art,1-real). Introduce the number: '))
-    classlab = int(input('Does your input data has labels? (1-yes, 0-no). Introduce the number: '))
+    realdata = int(input('Select the dataset? (0,1,2,3,4,5,6,7,8,9). Introduce the number: '))
+    rows = []
 
-    if realdata:
-        # Real Database
-        databse1 = 'grid.arff'  # 'grid.arff' 'vehicle.arff'
+    if realdata == 0:
+        # Grid Database
+        databse1 = 'grid.arff'
         dat1 = arff.loadarff('datasets/' + databse1)
         df1 = pd.DataFrame(dat1[0])  # pandas
         data1_notnorm = df1.values  # numpy array
         data1 = np.copy(data1_notnorm)
-    else:
-        # Artificial Database
+        cl = 1
+    elif realdata == 1:
+        # Bupa Database
+        databse1 = 'bupa.arff'
+        dat1 = arff.loadarff('datasets/' + databse1)
+        df1 = pd.DataFrame(dat1[0])  # pandas
+        data1_notnorm = df1.values  # numpy array
+        data1 = np.copy(data1_notnorm)
+        cl = 1
+    elif realdata == 2:
+        # Bupa Database
+        databse1 = 'cmc.arff'
+        dat1 = arff.loadarff('datasets/' + databse1)
+        df1 = pd.DataFrame(dat1[0])  # pandas
+        data1_notnorm = df1.values  # numpy array
+        data1 = np.copy(data1_notnorm)
+        for i in range(0, data1.shape[0]):
+            for j in range(0, data1.shape[1]):
+                data1[i,j] = float(data1[i,j])
+        cl = 1
+    elif realdata == 3:
+        # Artificial Database (created by mutlivariable probability distrbutions)
         mean1 = [0, 0]; mean2 = [4, 4]; mean3 = [-4, 5]; cov1 = [[1, 0], [0, 2]]; cov3 = [[0.5, 0], [0, 0.5]]
         x1, y1 = np.random.multivariate_normal(mean1, cov1, 5000).T
         x2, y2 = np.random.multivariate_normal(mean2, cov1, 5000).T
@@ -26,12 +46,32 @@ def read_dataset():
         data1 = np.zeros((len(x), 2))
         data1[:, 0] = x
         data1[:, 1] = y
-
-    # Count last columns as a feature or as a label [0-Feature, 1-Label]
-    if classlab:
-        cl = 1
-    else:
         cl = 0
+    elif realdata == 4:
+        # Iris Database
+        databse1 = 'iris.arff'
+    elif realdata == 5:
+        # Pen-based Database
+        databse1 = 'pen-based.arff'
+    elif realdata == 6:
+        # Waveform Database
+        databse1 = 'waveform.arff'
+    elif realdata == 7:
+        # Segment Database
+        databse1 = 'segment.arff'
+    elif realdata == 8:
+        # Pima-diabetes Database
+        databse1 = 'pima_diabetes.arff'
+    elif realdata == 9:
+        # Breast cancer Wisconsin Database
+        databse1 = 'breast-w.arff'
+
+    if realdata > 3:
+        dat1 = arff.loadarff('datasets/' + databse1)
+        df1 = pd.DataFrame(dat1[0])  # pandas
+        data1_notnorm = df1.values  # numpy array
+        data1 = np.copy(data1_notnorm)
+        cl = 1
 
     pre_pro = prp.LabelEncoder()  # Label Encoding
     pre_pro2 = prp.OneHotEncoder(sparse=False)  # One hot encoding
@@ -43,7 +83,7 @@ def read_dataset():
     N_features = data1.shape[1] - cl
     for i in range(0, N_features):
         if not isinstance(data1[0][i], np.float):
-            print('Feature ' + str(i) + ' has been encoded as one hot')
+            # print('Feature ' + str(i) + ' has been encoded as one hot')
             data1[:, i] = pre_pro.fit_transform(data1[:, i])
             data = pre_pro2.fit_transform(data1[:, i].reshape(len(data1[:, i]), 1))
             data1 = np.concatenate((data1, data), axis=1)
@@ -51,7 +91,7 @@ def read_dataset():
             variable = True
 
         else:
-            print('Feature ' + str(i) + ' has NOT been encoded as one hot')
+            # print('Feature ' + str(i) + ' has NOT been encoded as one hot')
             data = data1[:, i].reshape(len(data1[:, i]), 1)
             data = np.float64(data)
             inds = np.where(np.isnan(data))
@@ -65,4 +105,4 @@ def read_dataset():
         data1 = np.delete(data1, features_to_delete, axis=1)
         data1 = np.delete(data1, 0, axis=1)
 
-    return data1, classlab
+    return data1[:,0:N_features]
